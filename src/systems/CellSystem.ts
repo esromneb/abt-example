@@ -314,67 +314,67 @@ class CellSystem extends ApeECS.System {
   // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 
   calculateLife() {
-    const sz = this.wp.board.getBoardSize();
-    let kill: Vec2[] = [];
-    let spawn: Vec2[] = [];
-    let grab: Vec2[] = [];
+    // const sz = this.wp.board.getBoardSize();
+    // let kill: Vec2[] = [];
+    // let spawn: Vec2[] = [];
+    // let grab: Vec2[] = [];
 
-    let neighbors = {};
-    for(let x = 0; x < sz[0]; x++) {
-      for(let y = 0; y < sz[1]; y++) {
-        const tile: Vec2 = [x,y];
-        const key = `c${x}_${y}`;
+    // let neighbors = {};
+    // for(let x = 0; x < sz[0]; x++) {
+    //   for(let y = 0; y < sz[1]; y++) {
+    //     const tile: Vec2 = [x,y];
+    //     const key = `c${x}_${y}`;
 
-        const e = this.cellInTile(tile);
-        if(!!e && e.c.cell.ctype === 'ice' ) {
-          this.iceRules(tile, key, kill, spawn, grab)
-        } else if (!!e && e.c.cell.ctype === 'potion' ) {
-          // do nothing for potions
-          // they are destroyed when consumed by a neighbor cell
-        } else {
-          this.normalRules(tile, key, kill, spawn, grab);
-        }
+    //     const e = this.cellInTile(tile);
+    //     if(!!e && e.c.cell.ctype === 'ice' ) {
+    //       this.iceRules(tile, key, kill, spawn, grab)
+    //     } else if (!!e && e.c.cell.ctype === 'potion' ) {
+    //       // do nothing for potions
+    //       // they are destroyed when consumed by a neighbor cell
+    //     } else {
+    //       this.normalRules(tile, key, kill, spawn, grab);
+    //     }
 
 
-      }
-    }
+    //   }
+    // }
 
-    // console.log(neighbors);
+    // // console.log(neighbors);
 
-    let childEffects: any = {};
+    // let childEffects: any = {};
 
-    for( let s of spawn ) {
-      const key = `c${s[0]}_${s[1]}`;
-      // if( s[0] == 4 && s[1] == 6 ) {
+    // for( let s of spawn ) {
+    //   const key = `c${s[0]}_${s[1]}`;
+    //   // if( s[0] == 4 && s[1] == 6 ) {
 
-      // } else {
-      //   continue;
-      // }
-      childEffects[key] = this.calculateSpawnEffectsFromNeighbors(s);
-      // childEffects[key] = new Set();
+    //   // } else {
+    //   //   continue;
+    //   // }
+    //   childEffects[key] = this.calculateSpawnEffectsFromNeighbors(s);
+    //   // childEffects[key] = new Set();
 
-      // console.log(s);
-    }
+    //   // console.log(s);
+    // }
 
-    for( let g of grab ) {
-      const e = this.cellInTile(g);
-      this.grabPotions(e, g, kill);
-    }
+    // for( let g of grab ) {
+    //   const e = this.cellInTile(g);
+    //   this.grabPotions(e, g, kill);
+    // }
 
-    for( let k of kill ) {
-      this.destroyCell(k);
-    }
+    // for( let k of kill ) {
+    //   this.destroyCell(k);
+    // }
 
-    for(let s of spawn ) {
-      const key = `c${s[0]}_${s[1]}`;
-      const spawned = this.spawnCell(s, childEffects[key]);
+    // for(let s of spawn ) {
+    //   const key = `c${s[0]}_${s[1]}`;
+    //   const spawned = this.spawnCell(s, childEffects[key]);
 
-      // for(let effect of ) {
-      //   spawned.addComponent(effect);
-      // }
-    }
+    //   // for(let effect of ) {
+    //   //   spawned.addComponent(effect);
+    //   // }
+    // }
 
-    this.consolodateEffects();
+    // this.consolodateEffects();
   }
 
   // if a crowd effect goes below this limit it is ended
@@ -495,6 +495,33 @@ class CellSystem extends ApeECS.System {
   }
 
 
+  spawnUnit(tile: Vec2): Entity {
+
+    const s = this._createUnitSpriteDuringSpawn(tile);
+
+    // we use an id for this entity which is composed of the letter c and the tiles 
+    // coordinates.  This allows us to fetch this entity on demand if we have a tile
+    const e = this.world.createEntity({
+      id: `c${tile[0]}_${tile[1]}`,
+      components: [
+        {
+          type: 'Tile',
+          key: 'tile',
+          vec2: tile,
+        },
+        {
+          type: 'Cell',
+          key: 'cell',
+          sprite: s,
+        }
+      ]
+    });
+
+    this.updateCellGraphics(e);
+    return e;
+  }
+
+
   // returns the new entity if spawned
   // returns the existing one if something already exists here
   // effects is a list of component objects to add after spawning
@@ -533,6 +560,31 @@ class CellSystem extends ApeECS.System {
 
     this.updateCellGraphics(e);
     return e;
+  }
+
+  _createUnitSpriteDuringSpawn(pixel: Vec2): Entity {
+    const [x,y] = pixel;
+
+
+    const s = this.world.createEntity({
+        tags: ['New'],
+        components: [
+          {
+            type: 'Sprite',
+            key: 's0',
+            // frame: 'pearl_01d',
+            scale: this.spriteSize,
+          },
+          {
+            type: 'Position',
+            key: 'position',
+            x,
+            y,
+          }
+        ]
+      });
+
+    return s;
   }
 
   _createSpriteDuringSpawn(tile: Vec2): Entity {

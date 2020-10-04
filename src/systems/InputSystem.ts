@@ -332,6 +332,9 @@ class InputSystem extends ApeECS.System {
   buttons: any[] = [];
 
 
+  spriteSize: number = 0.7;
+
+
   // border: any;
   cells: any;
 
@@ -339,6 +342,8 @@ class InputSystem extends ApeECS.System {
     this.drawButtons();
     this.changeUIMode('normal');
     this.clickBounds = this.wp.board.getClickBounds();
+
+    this.spriteSize = this.wp.cell.getSpriteScale();
   }
 
   drawButtons() {
@@ -455,9 +460,19 @@ class InputSystem extends ApeECS.System {
   }
   private leftMouseDownNormal(px: Vec2): void {
     console.log('leftMouseDownNormal');
-    const tile: Vec2 = this.wp.board.pixelToTile(px);
+    // const tile: Vec2 = this.wp.board.pixelToTile(px);
 
-    this.wp.cell.mutateCellFlip(tile);
+    const sz: Vec2 = [48*this.spriteSize,48*this.spriteSize];
+
+    const offset: Vec2 = [sz[0]/2,sz[1]/2];
+
+    const final: Vec2 = [px[0]-offset[0], px[1]-offset[1]];
+
+
+
+
+    // this.wp.cell.mutateCellFlip(tile);
+    this.wp.cell.spawnUnit(final);
     this.wp.cell.notifyCellStateChanged();
   }
   // private updateMouseHoverTextNormal(v: Vec2): void {
