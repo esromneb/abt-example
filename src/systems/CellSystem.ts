@@ -531,6 +531,7 @@ class CellSystem extends ApeECS.System {
     });
 
     e.c.cell.ai = aie;
+    aie.c.tree.cell = e;
 
     return e;
   }

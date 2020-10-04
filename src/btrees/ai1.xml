@@ -3,13 +3,26 @@
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
-            <Action ID="waitFrames" _in_0="120"/>
+            <Action ID="waitFrames" _in_0="15"/>
             <Action ID="moveTo" x="50" y="50"/>
-            <Action ID="log" _in_0="Hello"/>
+            <Action ID="waitFrames" _in_0="30"/>
+            <ForceSuccess>
+                <Sequence>
+                    <Action ID="entityHas" key="Moving"/>
+                    <Action ID="stopMoving"/>
+                </Sequence>
+            </ForceSuccess>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <TreeNodesModel>
+        <Action ID="entityHas">
+            <input_port name="key"/>
+        </Action>
+        <Action ID="hasTag">
+            <input_port name="path"/>
+            <input_port name="tag"/>
+        </Action>
         <Action ID="log">
             <input_port name="_in_0"/>
         </Action>
@@ -17,6 +30,7 @@
             <input_port name="x"/>
             <input_port name="y"/>
         </Action>
+        <Action ID="stopMoving"/>
         <Action ID="waitFrames">
             <input_port default="30" name="_in_0"/>
         </Action>

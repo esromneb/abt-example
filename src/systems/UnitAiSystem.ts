@@ -4,6 +4,10 @@ import {
 Vec2
 } from '../Types'
 
+import {
+My2D
+} from '../My3D'
+
 
 import {
   System,
@@ -29,6 +33,10 @@ AsyncBehaviorTree
 const treeAi1 = require("../btrees/ai1.xml");
 
 
+
+
+
+
 class UnitAiSystem extends ApeECS.System {
 
   // spriteQuery: Query;
@@ -36,6 +44,7 @@ class UnitAiSystem extends ApeECS.System {
   // game: any;
 
   newTreeQ: Query;
+  movingUnitQ: Query;
 
   logSimulationStep: boolean = false;
 
@@ -53,6 +62,10 @@ class UnitAiSystem extends ApeECS.System {
 
     this.newTreeQ = this.createQuery()
       .fromAll('BehaviorTree', 'New')
+      .persist();
+
+    this.movingUnitQ = this.createQuery()
+      .fromAll('BehaviorTree', 'Moving')
       .persist();
 
     // this.stepQ = this.createQuery()
@@ -77,7 +90,7 @@ class UnitAiSystem extends ApeECS.System {
 
   // all runables must resolve if we are destroyed
   waitFrames(frames: number): Promise<boolean> {
-    console.log('waitFrames', this.world.currentTick, frames);
+    // console.log('waitFrames', this.world.currentTick, frames);
     return new Promise((resolve, reject)=>{
       if( frames < 0 ) {
         reject(new Error(`waitFrames can't accept negative value ${frames}`));
@@ -91,7 +104,7 @@ class UnitAiSystem extends ApeECS.System {
       this.runables.push((fc:number)=>{
         const delta = fc - start;
         if( delta >= frames ) {
-          console.log('finished', frames);
+          // console.log('finished', frames);
           resolve(true);
           return true;
         }
@@ -108,10 +121,6 @@ class UnitAiSystem extends ApeECS.System {
 
 
 
-  async moveTo(x: number, y: number): Promise<boolean> {
-    return true;
-  }
-
 
 
 
@@ -122,6 +131,7 @@ class UnitAiSystem extends ApeECS.System {
     this.f = tick;
     // console.log('update ai');
     this.handleSpawn(tick);
+    this.handleMoving(tick);
 
     this.runRunnables();
   }
@@ -132,7 +142,7 @@ class UnitAiSystem extends ApeECS.System {
       for (const tree of e.getComponents('BehaviorTree')) {
         console.log("Got a new ai");
 
-        tree.abt = this.newTree();
+        tree.abt = this.newTree(e);
 
         console.log(tree.destroyed);
 
@@ -160,11 +170,89 @@ class UnitAiSystem extends ApeECS.System {
     }
   }
 
-  private newTree(): any {
+
+
+  private handleMoving(tick: number): void {
+
+    // if( tick % 60 !== 0 ) {
+    //   return;
+    // }
+
+    const sete = this.movingUnitQ.execute();
+    for (const e of sete) {
+      // console.log(e.c.tree.cell.c.tile.vec2, 'moving to', e.c.tree.dest);
+      const loc: Vec2 = e.c.tree.cell.c.tile.vec2;
+      const dest: Vec2 = e.c.tree.dest;
+
+      let distance = My2D.sub(dest, loc);
+
+      if( My2D.mag(distance) < 40 ) {
+        e.removeTag('Moving');
+        continue;
+      }
+
+      let vec = My2D.normalize(distance);
+
+      e.c.tree.cell.c.tile.vec2 = My2D.add(e.c.tree.cell.c.tile.vec2, vec);
+
+      e.c.tree.cell.c.cell.sprite.c.position.x = e.c.tree.cell.c.tile.vec2[0];
+      e.c.tree.cell.c.cell.sprite.c.position.y = e.c.tree.cell.c.tile.vec2[1];
+
+      e.c.tree.cell.c.cell.sprite.addTag('UpdateSprite');
+
+
+    }
+  }
+
+
+
+  private newTree(e): any {
 
     const that = this;
 
-    const prx: any = new Proxy({}, {
+    // const bind = {
+    //   'moveTo': moveTo,
+    // }
+
+    // const moveTo = async 
+
+    const proxyBase = {
+        // this is called with this set to the blackBoard
+       async entityHas(args: any): boolean {
+         const e = this.e;
+
+         // console.log("checking if",e,"has",args.key);
+
+         return e.has(args.key);
+       },
+       async moveTo(args: any): boolean {
+
+        const e = this.e;
+
+        // console.log('move to');
+        // console.log(this);
+        // console.log(e);
+
+        e.c.tree.dest = [parseInt(args.x,10),parseInt(args.y,10)];
+
+        e.moving = true;
+
+        e.addTag('Moving');
+
+        
+
+        return true;
+      },
+      async stopMoving(args: any): boolean {
+        const e = this.e;
+        e.removeTag('Moving');
+        return true;
+      }
+
+    }
+
+
+    const prx: any = new Proxy(proxyBase, {
       get(obj, prop) {
 
         if( prop in that ) {
@@ -176,18 +264,22 @@ class UnitAiSystem extends ApeECS.System {
           return that[prop];//.bind(this);
         }
 
-        // if( prop === 'e' ) {
-        //   return e;
-        // }
+        if( prop === 'e' ) {
+          return e;
+        }
 
         // console.log("Get for ");
         // // console.log(obj);
         // console.log(prop);
-        return undefined;
+        return obj[prop];
       },
       has(target, key) {
         
         if( key in that ) {
+          return true;
+        }
+
+        if( key === 'e' ) {
           return true;
         }
 

@@ -208,6 +208,7 @@ class WorldParent extends Scene {
     tags.push('New');
     tags.push('Station');
     tags.push('UpdateSprite');
+    tags.push('Moving');
 
     this.world.registerTags(...tags);
   }

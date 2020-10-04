@@ -206,5 +206,8 @@ export class BehaviorTree extends Component {
 static properties = {
     abt: null,
     runner: null,
+    dest: [0,0],
+    moving: false,
+    cell: EntityRef,
   };
 };
