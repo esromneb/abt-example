@@ -1,7 +1,7 @@
 import {
 Vec2,
 Vec3,
-} from './GTypes'
+} from './Types'
 
 
 class Ray3 {

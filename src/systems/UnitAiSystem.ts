@@ -218,14 +218,14 @@ class UnitAiSystem extends ApeECS.System {
 
     const proxyBase = {
         // this is called with this set to the blackBoard
-       async entityHas(args: any): boolean {
+       entityHas(args: any): boolean {
          const e = this.e;
 
          // console.log("checking if",e,"has",args.key);
 
          return e.has(args.key);
        },
-       async moveTo(args: any): boolean {
+       moveTo(args: any): boolean {
 
         const e = this.e;
 
@@ -243,7 +243,7 @@ class UnitAiSystem extends ApeECS.System {
 
         return true;
       },
-      async stopMoving(args: any): boolean {
+      stopMoving(args: any): boolean {
         const e = this.e;
         e.removeTag('Moving');
         return true;
