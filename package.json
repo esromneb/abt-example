@@ -1,0 +1,47 @@
+{
+  "name": "abt-example",
+  "version": "0.5.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --no-cache --coverage",
+    "dev:assets": "webpack-cli --mode=development --display=verbose --watch ",
+    "dev:start": "npm run build && live-server --port=5000 --open=./build/ --host=localhost --watch=./build/  ",
+    "dev": "npm-run-all -p dev:*",
+    "build": "NODE_ENV=development webpack-cli --mode='development'",
+    "prod": "webpack-cli",
+    "pretest": "npm run build",
+    "jestc": "jest --clearCache",
+    "jestw": "jest --watch --runInBand --detectOpenHandles"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.11.4",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/preset-env": "^7.11.0",
+    "@types/jest": "^25.2.1",
+    "babel-loader": "^8.1.0",
+    "canvas": "^2.6.1",
+    "copy-webpack-plugin": "^5.1.1",
+    "jest": "^25.3.0",
+    "jest-environment-jsdom-fourteen": "^1.0.1",
+    "jest-watch-typeahead": "^0.5.0",
+    "live-server": "^1.2.1",
+    "npm-run-all": "^4.1.5",
+    "serve": "^11.3.2",
+    "ts-jest": "^25.4.0",
+    "ts-loader": "^7.0.1",
+    "typescript": "^3.8.3",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "@types/node": "^13.13.2",
+    "ape-ecs": "git+https://github.com/fritzy/ape-ecs.git#7d5afe82836a0f07cba857b84da676a1445c4996",
+    "colorsys": "^1.0.22",
+    "pixi-filters": "^3.1.1",
+    "pixi.js": "^5.3.3"
+  }
+}
