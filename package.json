@@ -40,8 +40,10 @@
   "dependencies": {
     "@types/node": "^13.13.2",
     "ape-ecs": "git+https://github.com/fritzy/ape-ecs.git#7d5afe82836a0f07cba857b84da676a1445c4996",
+    "async-behavior-tree": "^0.6.0",
     "colorsys": "^1.0.22",
     "pixi-filters": "^3.1.1",
-    "pixi.js": "^5.3.3"
+    "pixi.js": "^5.3.3",
+    "raw-loader": "^4.0.1"
   }
 }

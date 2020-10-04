@@ -205,5 +205,6 @@ static properties = {
 export class BehaviorTree extends Component {
 static properties = {
     abt: null,
+    runner: null,
   };
 };

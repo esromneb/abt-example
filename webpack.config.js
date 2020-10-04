@@ -27,7 +27,18 @@ module.exports = {
                   plugins: [ "@babel/plugin-proposal-class-properties"]
                 }
               }
-	  }
+	  },
+    {
+      test: /\.xml/i,
+      use: [
+        {
+          loader: 'raw-loader',
+          options: {
+            esModule: false,
+          },
+        },
+      ],
+    },
 	]
   },
   plugins: [
