@@ -141,6 +141,7 @@ export class Cell extends Component {
     tickAdded: 0,
     sprite: EntityRef,
     ctype: 'cell',
+    ai: EntityRef,
   }
 }
 
@@ -192,5 +193,17 @@ static properties = {
 export class CellHistory extends Component {
 static properties = {
     snapshots: []
+  };
+};
+
+export class UnitBlackBoard extends Component {
+static properties = {
+    spawnedFrame: 0,
+  };
+};
+
+export class BehaviorTree extends Component {
+static properties = {
+    abt: null,
   };
 };

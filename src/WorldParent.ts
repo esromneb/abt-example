@@ -6,7 +6,7 @@ import {BoardSystem} from './systems/BoardSystem'
 import {CellSystem} from './systems/CellSystem'
 import {InputSystem} from './systems/InputSystem'
 import {HistorySystem} from './systems/HistorySystem'
-import {UnitAISystem} from './systems/UnitAISystem'
+import {UnitAiSystem} from './systems/UnitAiSystem'
 
 import {
 Vec2
@@ -42,7 +42,7 @@ class WorldParent extends Scene {
   cell: CellSystem;
   input: InputSystem;
   history: HistorySystem;
-  unitAI: UnitAISystem;
+  unitAI: UnitAiSystem;
 
   eboard: Entity;
 
@@ -83,6 +83,7 @@ class WorldParent extends Scene {
     this.world.tick();
 
     this.world.runSystems('cell');
+    this.world.runSystems('unitAi');
     this.world.runSystems('sprite');
   }
 
@@ -191,7 +192,7 @@ class WorldParent extends Scene {
     this.cell       = this.world.registerSystem('cell',    new CellSystem(this.world, this));
     this.input      = this.world.registerSystem('input',   new InputSystem(this.world, this));
     this.history    = this.world.registerSystem('history', new HistorySystem(this.world, this));
-    this.unitAI     = this.world.registerSystem('unitAI',  new UnitAISystem(this.world, this));
+    this.unitAI     = this.world.registerSystem('unitAi',  new UnitAiSystem(this.world, this));
   }
 
   registerComponents(): void {

@@ -518,6 +518,20 @@ class CellSystem extends ApeECS.System {
     });
 
     this.updateCellGraphics(e);
+
+
+    const aie = this.world.createEntity({
+      tags: ['New'],
+      components: [
+        {
+          type: 'BehaviorTree',
+          key: 'tree',
+        }
+      ]
+    });
+
+    e.c.cell.ai = aie;
+
     return e;
   }
 
