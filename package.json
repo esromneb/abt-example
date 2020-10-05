@@ -28,7 +28,7 @@
     "@types/jest": "^25.2.1",
     "@types/node": "^13.13.2",
     "ape-ecs": "git+https://github.com/fritzy/ape-ecs.git#7d5afe82836a0f07cba857b84da676a1445c4996",
-    "async-behavior-tree": "^0.6.0",
+    "async-behavior-tree": "^0.6.1",
     "babel-loader": "^8.1.0",
     "behavior-tree-zmq": "^0.5.0",
     "canvas": "^2.6.1",
