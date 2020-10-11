@@ -31,7 +31,8 @@ const entry = path.resolve(path.join(__dirname, './src/server/server.ts'));
 module.exports = {
     devtool: false,
     externals: [
-        nodeExternals()
+        nodeExternals(),
+        {fs: "commonjs fs"},
     ],
     name: 'server',
     plugins: plugins,
