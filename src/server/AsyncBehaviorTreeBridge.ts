@@ -59,6 +59,7 @@ class AsyncBehaviorTreeBridge {
   matrix: any = {
     'hello': this.handleHello.bind(this),
     'save':  this.handleSave.bind(this),
+    'boot':  this.handleBoot.bind(this),
   };
 
   parseMessage(t: string, id: string, m: any): void {
@@ -75,6 +76,10 @@ class AsyncBehaviorTreeBridge {
     //     this.handleHello()
 
     // }
+  }
+
+  handleBoot(id: string, m: any): void {
+    console.log(m);
   }
 
 

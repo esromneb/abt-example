@@ -1,4 +1,7 @@
 import {WorldParent} from '../WorldParent'
+import {AsyncBehaviorTreeBridgeClient} from '../AsyncBehaviorTreeBridgeClient'
+import {AsyncBehaviorTreeJsonLogger} from '../AsyncBehaviorTreeJsonLogger'
+
 
 import {
 Vec2
@@ -49,6 +52,8 @@ class UnitAiSystem extends ApeECS.System {
   logSimulationStep: boolean = false;
 
   wp: WorldParent;
+
+  abtClient: any;
   // stepQ: Query;
 
   // spriteSize: number = 0.7;
@@ -56,6 +61,10 @@ class UnitAiSystem extends ApeECS.System {
   constructor(world, worldParent) {
     super(world);
     this.wp = worldParent;
+
+    this.handleWebsocketLogger();
+
+
   }
 
   init() {
@@ -71,6 +80,13 @@ class UnitAiSystem extends ApeECS.System {
     // this.stepQ = this.createQuery()
     //   .fromAll('StepSimulation')
     //   .persist();
+  }
+
+  treeConnected: boolean = false;
+
+  handleWebsocketLogger(): void {
+    this.abtClient = new AsyncBehaviorTreeBridgeClient();
+    this.abtClient.open();
   }
 
 
@@ -144,7 +160,13 @@ class UnitAiSystem extends ApeECS.System {
 
         tree.abt = this.newTree(e);
 
-        console.log(tree.destroyed);
+        if( !this.treeConnected ) {
+          this.treeConnected = true;
+          let jlog = new AsyncBehaviorTreeJsonLogger(this.abtClient.write.bind(this.abtClient));
+          tree.abt.setJsonLogger(jlog);
+        }
+
+        // console.log(tree.destroyed);
 
         tree.runner = setTimeout(async ()=>{
           while(!tree.entity.destroyed) {

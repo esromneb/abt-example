@@ -1,4 +1,4 @@
-
+import {getRandomId} from './Util'
 
 class AsyncBehaviorTreeBridgeClient {
 
@@ -9,15 +9,17 @@ class AsyncBehaviorTreeBridgeClient {
   // global: Entity;
   // gecs: GEntityComponentSystem;
 
-  constructor(public options:{wsPort:8094}) {
+  constructor(public options:any = {wsPort:8094}) {
 
   }
 
   ws: any;
 
-  sessionId: '2342f34asdaf23';
+  sessionId: string;
 
   open(): void {
+
+    this.sessionId = getRandomId();
 
     const path = `ws://localhost:${this.options.wsPort}`
 
@@ -54,7 +56,7 @@ class AsyncBehaviorTreeBridgeClient {
 
   localSave: string;
 
-  private write(t: string, m: any): void {
+  write(t: string, m: any): void {
     const o = {t,m,i:this.sessionId};
     const s = JSON.stringify(o);
 
