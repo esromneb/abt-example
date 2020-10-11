@@ -4,6 +4,10 @@ AsyncBehaviorTree,
 ABTZmqLogger,
 } from "async-behavior-tree";
 
+import {
+AsyncBehaviorTreeFileSink
+} from "./AsyncBehaviorTreeFileSink";
+
 
 // export interface ABTZmqLogger {
 //   dataCallback(buf: Uint8Array, flushBuf: Vec2[]): void;
@@ -77,7 +81,6 @@ class AsyncBehaviorTreeBridge {
 
   matrix: any = {
     'hello': this.handleHello.bind(this),
-    'save':  this.handleSave.bind(this),
     'boot':  this.handleBoot.bind(this),
     't':     this.handleTransition.bind(this),
   };
@@ -98,14 +101,6 @@ class AsyncBehaviorTreeBridge {
     // }
   }
 
-  // internal to server only
-  gotTransition(sess: any, buf: Uint8Array) {
-
-      sess.zmq.dataCallback(buf, undefined);
-
-
-    // this.transitions++;
-  }
 
   // client sent us a transition
   handleTransition(id: string, m: any): void {
@@ -138,18 +133,36 @@ class AsyncBehaviorTreeBridge {
     // console.log("got transition", m);
   }
 
+  chooseFilename(): string {
+    const name = `log_${process.pid}.fbl`;
+    return name;
+  }
 
 
-  async setZmqLogger(sess: any, bt: any, l: any, z: ABTZmqLogger): Promise<void> {
+
+  async setZmqLogger(sess: any, bt: any, l: any, z: ABTZmqLogger, file: any): Promise<void> {
     sess.logger = l;
     sess.zmq = z;
     sess.bt = bt;
+    sess.file = file;
 
     await sess.logger.start();
+
+    const fname = this.chooseFilename();
+    console.log(`Writing log to ${fname}`);
+    
+    await file.setFilePath(fname);
+
+    
+
+
     // sess.logger.writeToCallback(sess.gotTransition.bind(sess));
     sess.logger.writeToCallback((b)=>{
       // console.log(b);
-      this.gotTransition(sess, b);
+      // this.gotTransition(sess, b);
+      z.dataCallback(b, undefined);
+      file.write(b);
+
     });
 
 
@@ -176,10 +189,11 @@ class AsyncBehaviorTreeBridge {
     let bt = new AsyncBehaviorTree(sess.xml, {});
     let l = new BehaviorTreeFlatBuffer();
     let z = new BehaviorTreeZmq();
+    let file = new AsyncBehaviorTreeFileSink();
 
     // z.logQueueDrain = true;
 
-    this.setZmqLogger(sess, bt, l, z).then(async ()=>{
+    this.setZmqLogger(sess, bt, l, z, file).then(async ()=>{
 
       await z.run();
 
@@ -224,18 +238,6 @@ class AsyncBehaviorTreeBridge {
     console.log('got hello from ' + id + ' with: ' + m.msg);
     this.newSession(id);
   }
-
-  handleSave(id: string, m: any): void {
-    console.log('got save from ' + id);
-
-    for( let i = 0; i < m.length; i++) {
-      // console.log(m[i]);
-
-      console.log(inspect(m[i], {showHidden: false, depth: null, colors: true}))
-
-    }
-  }
-
 
 }
 
