@@ -162,7 +162,8 @@ class UnitAiSystem extends ApeECS.System {
 
         if( !this.treeConnected ) {
           this.treeConnected = true;
-          let jlog = new AsyncBehaviorTreeJsonLogger(this.abtClient.write.bind(this.abtClient));
+          let options = {print:true};
+          let jlog = new AsyncBehaviorTreeJsonLogger(this.abtClient.write.bind(this.abtClient), options);
           tree.abt.setJsonLogger(jlog);
         }
 

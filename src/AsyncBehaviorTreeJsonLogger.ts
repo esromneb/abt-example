@@ -23,6 +23,8 @@ class AsyncBehaviorTreeJsonLogger {
 
   treeId: string;
 
+  start = new Date().getTime();
+
   constructor(public writeCb: any, public options: any = {print:false}) {
     this.currentNodeId = this.nodeOffset;
 
@@ -42,9 +44,17 @@ class AsyncBehaviorTreeJsonLogger {
   transitionCount: number = 0;
 
   logTransition(uid: number, prev_status: number, status: number): void {
+    let now = new Date();
+    const path = this.pathForNode[uid];
+
+    let delta: number = now.getTime() - this.start;
+
     if(this.options.print) {
-      console.log(`transition ${uid} ${prev_status} -> ${status}`);
+      console.log(`transition ${path} (${uid}) ${prev_status} -> ${status}   ${delta}`);
     }
+
+    this.writeCb('t', {tid: this.treeId, p:path, t:delta, ps:prev_status, s:status});
+
     this.transitionCount++;
   }
 
@@ -67,6 +77,8 @@ class AsyncBehaviorTreeJsonLogger {
     this.cb = cb;
   }
 
+  pathForNode = {};
+
   preNames = {};
 
   preWalkPaths = {};
@@ -75,6 +87,8 @@ class AsyncBehaviorTreeJsonLogger {
 
   preWalkTree(cb: any): void {
     this.preWalkPaths[cb.path] = this.currentNodeId;
+
+    this.pathForNode[this.currentNodeId] = cb.path;
 
     this.preNames[''+this.currentNodeId] = cb.name || cb.w;
 

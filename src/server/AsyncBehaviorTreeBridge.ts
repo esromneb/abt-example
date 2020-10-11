@@ -79,6 +79,7 @@ class AsyncBehaviorTreeBridge {
     'hello': this.handleHello.bind(this),
     'save':  this.handleSave.bind(this),
     'boot':  this.handleBoot.bind(this),
+    't':     this.handleTransition.bind(this),
   };
 
   parseMessage(t: string, id: string, m: any): void {
@@ -97,13 +98,44 @@ class AsyncBehaviorTreeBridge {
     // }
   }
 
+  // internal to server only
   gotTransition(sess: any, buf: Uint8Array) {
 
       sess.zmq.dataCallback(buf, undefined);
 
 
     // this.transitions++;
+  }
 
+  // client sent us a transition
+  handleTransition(id: string, m: any): void {
+
+    if( (!('p' in m)) || (!('t' in m)) || (!('ps' in m)) || (!('s' in m)) ) {
+      console.log("illegal message",id,m);
+      return;
+    }
+
+    const sess = this.getSession(id);
+
+    if( !sess.initialized ) {
+      console.log("Dropping", m);
+      return;
+    }
+
+    const path = m.p;
+    const delta = m.t;
+    const prev = m.ps;
+    const cur = m.s;
+
+
+
+    const uid = sess.logger.getForPath(path);
+
+    sess.logger.logTransitionDuration(uid, prev, cur, delta);
+
+
+
+    // console.log("got transition", m);
   }
 
 
@@ -145,12 +177,17 @@ class AsyncBehaviorTreeBridge {
     let l = new BehaviorTreeFlatBuffer();
     let z = new BehaviorTreeZmq();
 
-    this.setZmqLogger(sess, bt, l, z).then(()=>{
+    this.setZmqLogger(sess, bt, l, z).then(async ()=>{
 
-      z.run();
+      await z.run();
+
+      sess.initialized = true;
 
       let fn = () => {
         console.log(`fake log`);
+
+        // l.logTransition(1, 1, 2);
+
         setTimeout(fn, 3000);
       };
 
@@ -165,7 +202,11 @@ class AsyncBehaviorTreeBridge {
   }
 
   newSession(id: string): void {
-    this.sessions[id] = {start:new Date(),transitions:0};
+    this.sessions[id] = {
+      start:new Date(),
+      transitions:0,
+      initialized: false,
+    };
   }
 
   getSession(id: string): any {
