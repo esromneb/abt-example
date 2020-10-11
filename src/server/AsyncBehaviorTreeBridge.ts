@@ -177,6 +177,8 @@ class AsyncBehaviorTreeBridge {
     let l = new BehaviorTreeFlatBuffer();
     let z = new BehaviorTreeZmq();
 
+    // z.logQueueDrain = true;
+
     this.setZmqLogger(sess, bt, l, z).then(async ()=>{
 
       await z.run();
