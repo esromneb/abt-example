@@ -6,6 +6,9 @@ build:
 dev:
 	npm run dev
 
+dev_client:
+	npm run dev_client
+
 test: jestc
 	npm run test
 
@@ -23,6 +26,7 @@ jestw:
 
 clean:
 	rm -rf build
+	rm -rf server_public
 
 prod:
 	npm run prod

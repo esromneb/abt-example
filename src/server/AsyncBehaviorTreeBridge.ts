@@ -1,4 +1,23 @@
 
+import {
+AsyncBehaviorTree,
+ABTZmqLogger,
+} from "async-behavior-tree";
+
+
+// export interface ABTZmqLogger {
+//   dataCallback(buf: Uint8Array, flushBuf: Vec2[]): void;
+//   run(): Promise<void>;
+// }
+
+import {
+BehaviorTreeFlatBuffer
+} from "behavior-tree-flat-buffer";
+
+import {
+BehaviorTreeZmq
+} from "behavior-tree-zmq";
+
 const WebSocket = require('ws');
 
 
@@ -78,8 +97,79 @@ class AsyncBehaviorTreeBridge {
     // }
   }
 
+  gotTransition(sess: any, buf: Uint8Array) {
+
+      sess.zmq.dataCallback(buf, undefined);
+
+
+    // this.transitions++;
+
+  }
+
+
+
+  async setZmqLogger(sess: any, bt: any, l: any, z: ABTZmqLogger): Promise<void> {
+    sess.logger = l;
+    sess.zmq = z;
+    sess.bt = bt;
+
+    await sess.logger.start();
+    // sess.logger.writeToCallback(sess.gotTransition.bind(sess));
+    sess.logger.writeToCallback((b)=>{
+      // console.log(b);
+      this.gotTransition(sess, b);
+    });
+
+
+
+    // console.log(bt.getActionNodes());
+
+    sess.logger.registerActionNodes(bt.getActionNodes());
+    sess.logger.registerConditionNodes(bt.getConditionNodes());
+    sess.logger.parseXML(sess.xml);
+  }
+
+
+
+
+
+
+
   handleBoot(id: string, m: any): void {
-    console.log(m);
+    const sess = this.getSession(id);
+    sess.xml = m.xml;
+
+    // debugger;
+
+    let bt = new AsyncBehaviorTree(sess.xml, {});
+    let l = new BehaviorTreeFlatBuffer();
+    let z = new BehaviorTreeZmq();
+
+    this.setZmqLogger(sess, bt, l, z).then(()=>{
+
+      z.run();
+
+      let fn = () => {
+        console.log(`fake log`);
+        setTimeout(fn, 3000);
+      };
+
+      fn();
+
+    });
+
+    // sess.abt = new AsyncBehaviorTree(sess.xml, {});
+
+
+    // console.log(sess, m);
+  }
+
+  newSession(id: string): void {
+    this.sessions[id] = {start:new Date(),transitions:0};
+  }
+
+  getSession(id: string): any {
+    return this.sessions[id];
   }
 
 
@@ -89,6 +179,7 @@ class AsyncBehaviorTreeBridge {
     //   return;
     // }
     console.log('got hello from ' + id + ' with: ' + m.msg);
+    this.newSession(id);
   }
 
   handleSave(id: string, m: any): void {
